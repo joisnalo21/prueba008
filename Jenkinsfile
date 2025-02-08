@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "tuusuario/laravel-app"
+        DOCKER_IMAGE = "joisnalo21/prueba008"
         DOCKER_REGISTRY = "docker.io"
     }
 
     stages {
         stage('Checkout Código') {
             steps {
-                git branch: 'main', url: 'https://github.com/tuusuario/turepo.git'
+                git branch: 'master', url: 'https://github.com/joisnalo21/prueba008.git'
             }
         }
 
