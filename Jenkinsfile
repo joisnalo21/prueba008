@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'composer:latest' // Usa la imagen oficial de Composer
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "joisnalo21/prueba008"
