@@ -1,7 +1,8 @@
 pipeline {
     agent {
-        docker {
+        dockerContainer {
             image 'composer:latest' // Usa la imagen oficial de Composer
+            args '--user root' // Para evitar problemas de permisos
         }
     }
 
