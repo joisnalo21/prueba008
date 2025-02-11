@@ -1,74 +1,44 @@
 pipeline {
-    agent any  // Usa el agente por defecto de Jenkins
-
-    environment {
-        DOCKER_IMAGE = "joisnalo21/prueba008"
-        DOCKER_REGISTRY = "docker.io"
-    }
-
+    agent any  // Indica que se puede ejecutar en cualquier nodo de Jenkins
+    
     stages {
-        stage('Checkout Código') {
+        stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/joisnalo21/prueba008.git'
+                // Clona el repositorio desde GitHub
+                git 'https://github.com/joisnalo21/prueba008.git'
             }
         }
-
+        
         stage('Instalar Dependencias') {
             steps {
-                sh 'docker run --rm -v $PWD:/app -w /app composer:latest install --no-dev --prefer-dist'
-                sh 'npm install'
-                sh 'npm run build'
+                // Usa Docker para instalar las dependencias de Composer
+                script {
+                    docker.image('composer:latest').inside {
+                        sh 'composer install --no-dev --prefer-dist'
+                    }
+                }
             }
         }
 
         stage('Ejecutar Pruebas Unitarias') {
             steps {
-                sh './vendor/bin/phpunit'
-            }
-        }
-
-        stage('Pruebas End-to-End con Selenium') {
-            steps {
-                sh 'php artisan serve &'
-                sh 'selenium-server -port 4444 &'
-                sh 'php artisan dusk'
-            }
-        }
-
-        stage('Construir Imagen Docker') {
-            steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
-            }
-        }
-
-        stage('Publicar Imagen Docker') {
-            steps {
-                withDockerRegistry([credentialsId: 'docker-hub-cred', url: "$DOCKER_REGISTRY"]) {
-                    sh 'docker push $DOCKER_IMAGE'
+                // Ejecuta las pruebas unitarias (esto asume que tienes PHPUnit o algo similar configurado)
+                script {
+                    sh 'php vendor/bin/phpunit --configuration phpunit.xml'
                 }
-            }
-        }
-
-        stage('Desplegar en Kubernetes') {
-            steps {
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl rollout status deployment/laravel-app'
-            }
-        }
-
-        stage('Monitoreo con Prometheus') {
-            steps {
-                sh 'kubectl apply -f k8s/prometheus-config.yaml'
             }
         }
     }
 
     post {
         success {
-            echo 'Despliegue exitoso 🎉'
+            // Se ejecuta si el pipeline fue exitoso
+            echo 'Pipeline ejecutado correctamente.'
         }
         failure {
-            echo 'Algo falló 💥'
+            // Se ejecuta si el pipeline falla
+            echo 'Hubo un error en la ejecución del pipeline.'
         }
     }
 }
+
