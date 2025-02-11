@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        dockerContainer {
-            image 'composer:latest' // Usa la imagen oficial de Composer
-            args '--user root' // Para evitar problemas de permisos
-        }
-    }
+    agent any  // Usa el agente por defecto de Jenkins
 
     environment {
         DOCKER_IMAGE = "joisnalo21/prueba008"
@@ -20,7 +15,7 @@ pipeline {
 
         stage('Instalar Dependencias') {
             steps {
-                sh 'composer install --no-dev --prefer-dist'
+                sh 'docker run --rm -v $PWD:/app -w /app composer:latest install --no-dev --prefer-dist'
                 sh 'npm install'
                 sh 'npm run build'
             }
